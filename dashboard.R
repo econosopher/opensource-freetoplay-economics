@@ -11,7 +11,6 @@ dashboardSidebar(
              )
     )
 )
-
 body <-
   dashboardBody(
     tabItems(
@@ -19,7 +18,7 @@ body <-
               h2("Dashboard tab content")
               ),
 
-      tabItem(tabName = "widgets",
+      tabItem(tabName = "data",
               h2("Widgets tab content")
               )
       )
