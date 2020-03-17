@@ -1,2 +1,4 @@
 # Open Source Free to Play Economics
-Data gathering is painful. And for every project firms tend to gather the same data. Let's open source the obvious, so we can focus on the non-obvious.
+Data gathering is painful. And for every project firms tend to gather the same data.
+
+Let's open source the obvious, so we can focus on the non-obvious. 
