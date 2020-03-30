@@ -61,6 +61,10 @@ output$hard_currency_table <- renderDT(
     server = FALSE #ya, it's weird. This is in the renderDT call, not datatable.
   )
 
+output$text <- renderPrint(
+  print("hi world")
+)
+
 }
 
 shinyApp(ui = ui, server = server)
