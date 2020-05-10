@@ -1,4 +1,3 @@
-
 sku_prices <- "
 game	usd_price	hard_currency	type
 battlefield_5	5	500	currency
