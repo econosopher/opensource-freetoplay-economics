@@ -7,7 +7,7 @@ library("scales")
 
 source("ui_elements/sidebar.R")
 source("ui_elements/body.R")
-source("data.R")
+source("data/sku_data.R")
 
 ui <-
   dashboardPage(
