@@ -61,63 +61,59 @@ output$hard_currency_table <- renderDT(
     server = FALSE #ya, it's weird. This is in the renderDT call, not datatable.
   )
 
-linear_df <- reactive({
+output$discount_over_base <- renderPlotly(
 
-  tibble(levels = seq(1, input$levels)) %>%
-    mutate(marginal_hours = input$levels / input$hours,
-           total_hours = cumsum(marginal_hours)
-    )
-})
+  sku_prices_df %>%
+  ungroup(game) %>%
+  ggplot(aes(x = usd_price, y = `% Discount Over Base SKU`, group = game, color = game)) +
+    geom_line() +
+    scale_y_continuous(labels = percent) +
+    scale_x_continuous(labels = dollar) +
+    labs(x = "SKU Price (USD)")
 
-exo_df <- reactive({
+  )
 
-  tibble(levels = seq(1, input$levels)) %>%
-    mutate(marginal_hours = input$levels / input$hours,
-           total_hours = cumsum(marginal_hours)
-    )
-})
+output$segment_mau <- renderPlotly(
 
-scurve <- function(x, ymin, ymax, x50L, x50U) {
-    a = (x50L + x50U) / 2
-    b = 2 / abs(x50L - x50U)
-    c = ymin
-    d = ymax - c
-    y = c + ( d / ( 1 + exp( b * (x - a) ) ) )
-    return(y)
- }
+merge_df %>%
+  filter(metric == 'Monthly Active Users 3') %>%
+  mutate(year = paste0(20, str_remove_all(cy, '^CY?')),
+         year_quarter = paste0(year, ' ', quarter),
+         year_quarter = yearquarter(year_quarter)
+         ) %>%
+  ggplot(aes(x = year_quarter, y = numeric, group = character, color = character)) +
+  labs(title = 'MAUs', y = 'Average Quartery MAU (millions)', x = '', color = "Segment") +
+  geom_point() +
+  geom_smooth(se = FALSE)
 
-progression_df <- reactive({
+  )
 
-level_sequence <-
-  tibble(levels = seq(1, input$sequence_length/2)) %>%
-  mutate(sigmoid_progression = scurve(levels, ymin = input$ymin, ymax = input$ymax, x50L = input$x50L, x50U = input$x50U)) %>%
-  arrange(sigmoid_progression) %>%
-  mutate(levels = seq(1, input$sequence_length/2)) %>%
-  add_row(
-    levels = seq((input$sequence_length/2)+1, input$sequence_length),
-    sigmoid_progression= rev(.$sigmoid_progression)
-    ) %>%
-  .$sigmoid_progression
+output$segment_revenue <- renderPlotly(
 
-progression_df <-
-  rep(level_sequence, times = (input$sequences)) %>%
-  tibble::enframe(name = NULL) %>%
-  mutate(
-    levels = row_number(),
-    total_time_to_level = cumsum(value),
-    ) %>%
-  rename(time_to_level = value)
+merge_df %>%
+  filter(metric == 'Monthly Active Users 3') %>%
+  mutate(year = paste0(20, str_remove_all(cy, '^CY?')),
+         year_quarter = paste0(year, ' ', quarter),
+         year_quarter = yearquarter(year_quarter)
+         ) %>%
+  ggplot(aes(x = year_quarter, y = numeric, group = character, color = character)) +
+  labs(title = 'MAUs', y = 'Average Quartery MAU (millions)', x = '', color = "Segment") +
+  geom_point() +
+  geom_smooth(se = FALSE)
 
-})
+  )
 
+output$bookings <- renderPlotly(
 
-output$progression_plot <- renderPlotly({
+merge_df %>%
+  filter(metric == 'Monthly Active Users 3') %>%
+  ggplot(aes(x = year_quarter, y = numeric, group = character, color = character)) +
+  labs(title = 'MAUs', y = 'Average Quartery MAU (millions)', x = '', color = "Segment") +
+  geom_point() +
+  geom_line() +
+  geom_smooth(se = FALSE)
 
-  progression_df() %>%
-    ggplot(aes(x = levels, y = total_time_to_level)) +
-      geom_line()
-
-})
+  )
 
 }
 
