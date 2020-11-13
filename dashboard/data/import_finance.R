@@ -26,8 +26,8 @@ for (path in file_path) {
 }
 
 # filter for sheets of interest
-import_clean_df <-
-import_df %>%
+quarterly_results_df <-
+quarterly_results %>%
   filter(sheet %in% c(
     'Operating Metrics',
     'NR and OI by Segment',
@@ -41,18 +41,20 @@ bold <- formats$local$font$bold # find bold format code
 
 merge_df <- data.frame()
 
-# loop for each sheet in df
-for (sheet_filter in unique(import_clean_df$sheet)) {
+# for each sheet, create new columns and clean data
+for (sheet_filter in unique(quarterly_results_df$sheet)) {
 
-  append_df <-
-    import_clean_df %>%
+  #append_df <-
+    quarterly_results_df %>%
     filter(sheet == sheet_filter) %>%
-    #filter(is_blank == FALSE, row > 3)  # 3 and above is header, filter out blanks
+    filter(!is_blank, row > 3) %>% # 3 and above is header, filter out blanks
     behead("up", "quarter") %>% # label quarter
     behead("up", "cy") %>% # label fiscal year
-    behead_if(bold[local_format_id], direction = 'left-up', name = 'metric') %>% # label bold columns
+    behead_if(bold[local_format_id] == TRUE, direction = 'left-up', name = 'metric') %>% # label bold columns
+    select(sheet:character, quarter:metric) %>%  # select columns we care about
+    filter(address == 'B8')
     fill(character, .direction = 'down') %>% # label segments (blizzard, king etc)
-    select(sheet:character, quarter:metric) # select columns we care about
+
 
   merge_df <- bind_rows(merge_df, append_df) # bind it all back together
 
@@ -74,3 +76,12 @@ merge_df %>%
   geom_point() +
   geom_line() +
   geom_smooth(se = FALSE)
+
+#append_df <-
+    quarterly_results_df %>%
+    filter(sheet == 'Operating Metrics') %>%
+    filter(is_blank == FALSE, row > 3) %>% # 3 and above is header, filter out blanks
+    behead("up", "quarter") %>% # label quarter
+    behead("up", "cy") %>%  # label fiscal year
+    view()
+    behead_if(bold[local_format_id] == TRUE, direction = 'left-up', name = 'metric')
