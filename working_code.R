@@ -55,3 +55,13 @@ output$progression_plot <- renderPlotly({
       geom_line()
 
 })
+
+# find the formating codes and specically the bold codes for each workbook
+for (workbook in unique(quarterly_sheets$workbook)) {
+
+  formats <-
+    quarterly_sheets %>%
+    filter(workbook = workbook) %>%
+    xlsx_formats(workbook)
+
+}

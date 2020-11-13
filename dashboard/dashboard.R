@@ -75,43 +75,24 @@ output$discount_over_base <- renderPlotly(
 
 output$segment_mau <- renderPlotly(
 
-merge_df %>%
-  filter(metric == 'Monthly Active Users 3') %>%
-  mutate(year = paste0(20, str_remove_all(cy, '^CY?')),
-         year_quarter = paste0(year, ' ', quarter),
-         year_quarter = yearquarter(year_quarter)
-         ) %>%
-  ggplot(aes(x = year_quarter, y = numeric, group = character, color = character)) +
-  labs(title = 'MAUs', y = 'Average Quartery MAU (millions)', x = '', color = "Segment") +
-  geom_point() +
-  geom_smooth(se = FALSE)
+  merge_df %>%
+    filter(metric == 'Monthly Active Users 3') %>%
+    ggplot(aes(x = year_quarter, y = numeric, group = character, color = character)) +
+    labs(title = 'MAUs', y = 'Average Quarterly MAU (millions)', x = '', color = "Segment") +
+    geom_point() +
+    geom_smooth(se = FALSE)
 
   )
 
 output$segment_revenue <- renderPlotly(
 
-merge_df %>%
-  filter(metric == 'Monthly Active Users 3') %>%
-  mutate(year = paste0(20, str_remove_all(cy, '^CY?')),
-         year_quarter = paste0(year, ' ', quarter),
-         year_quarter = yearquarter(year_quarter)
-         ) %>%
-  ggplot(aes(x = year_quarter, y = numeric, group = character, color = character)) +
-  labs(title = 'MAUs', y = 'Average Quartery MAU (millions)', x = '', color = "Segment") +
-  geom_point() +
-  geom_smooth(se = FALSE)
-
-  )
-
-output$bookings <- renderPlotly(
-
-merge_df %>%
-  filter(metric == 'Monthly Active Users 3') %>%
-  ggplot(aes(x = year_quarter, y = numeric, group = character, color = character)) +
-  labs(title = 'MAUs', y = 'Average Quartery MAU (millions)', x = '', color = "Segment") +
-  geom_point() +
-  geom_line() +
-  geom_smooth(se = FALSE)
+  merge_df %>%
+    filter(metric == 'Net Bookings 1') %>%
+    ggplot(aes(x = year_quarter, y = numeric, group = character, color = character)) +
+    labs(title = 'Quarterly Bookings', y = 'Quarterly Bookings (USD, millions)', x = '', color = "Segment") +
+    geom_point() +
+    geom_line() +
+    geom_smooth(se = FALSE)
 
   )
 

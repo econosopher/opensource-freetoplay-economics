@@ -1,32 +1,33 @@
 library(tidyverse)
+library(stringr)
 library(lubridate)
 library(tsibble)
 library(readxl)
 library(tidyxl)
 library(unpivotr)
 
-# list of files
-file_path <- list.files('dashboard/data', pattern = 'xlsx', full.names = TRUE)
+# list of quarterly earnings worksheets
+file_paths <- list.files('dashboard/data', pattern = 'xlsx', full.names = TRUE)
 
 # initialize data frame
 quarterly_results <- data.frame()
 
-# import all sheets and merge to one df
-for (path in file_path) {
+# import all sheets from each workbook and merge to one df
+for (path in file_paths) {
 
- import_df <-
+ import <-
   path %>%
   excel_sheets() %>%
   set_names() %>%
   map_df(xlsx_cells, path = path) %>%
-  mutate(file = path) # add column with path name
+  mutate(workbook = word(path, -1, sep = '/')) # add column with file_name
 
-  quarterly_results <- bind_rows(quarterly_results, import_df)
+  quarterly_results <- bind_rows(quarterly_results, import)
 
 }
 
-# filter for sheets of interest
-quarterly_results_df <-
+# filter for sheets of interest across all workbooks
+quarterly_sheets <-
 quarterly_results %>%
   filter(sheet %in% c(
     'Operating Metrics',
@@ -35,31 +36,29 @@ quarterly_results %>%
     'Rev Mix by Geographic Region'
     ))
 
-formats <- xlsx_formats(path) # find format codes
-
+formats <- xlsx_formats("dashboard/data/ATVI 12-Quarter Financial Model Q1 CY20a.xlsx") # find format codes
 bold <- formats$local$font$bold # find bold format code
 
 merge_df <- data.frame()
 
 # for each sheet, create new columns and clean data
-for (sheet_filter in unique(quarterly_results_df$sheet)) {
+for (sheet_filter in unique(quarterly_sheets$sheet)) {
 
-  #append_df <-
-    quarterly_results_df %>%
+  append_df <-
+    quarterly_sheets %>%
     filter(sheet == sheet_filter) %>%
     filter(!is_blank, row > 3) %>% # 3 and above is header, filter out blanks
     behead("up", "quarter") %>% # label quarter
     behead("up", "cy") %>% # label fiscal year
     behead_if(bold[local_format_id] == TRUE, direction = 'left-up', name = 'metric') %>% # label bold columns
     select(sheet:character, quarter:metric) %>%  # select columns we care about
-    filter(address == 'B8')
-    fill(character, .direction = 'down') %>% # label segments (blizzard, king etc)
-
+    fill(character, .direction = 'down')  # label segments (blizzard, king etc)
 
   merge_df <- bind_rows(merge_df, append_df) # bind it all back together
 
 }
 
+# clean and mutate data types
 merge_df <-
   merge_df %>%
   select(sheet, numeric, character:metric) %>%
@@ -77,11 +76,10 @@ merge_df %>%
   geom_line() +
   geom_smooth(se = FALSE)
 
-#append_df <-
-    quarterly_results_df %>%
-    filter(sheet == 'Operating Metrics') %>%
-    filter(is_blank == FALSE, row > 3) %>% # 3 and above is header, filter out blanks
-    behead("up", "quarter") %>% # label quarter
-    behead("up", "cy") %>%  # label fiscal year
-    view()
-    behead_if(bold[local_format_id] == TRUE, direction = 'left-up', name = 'metric')
+merge_df %>%
+  filter(metric == 'Net Bookings 1') %>%
+  ggplot(aes(x = year_quarter, y = numeric, group = character, color = character)) +
+  labs(title = 'Quarterly Bookings', y = 'Quarterly Bookings (USD, millions)', x = '', color = "Segment") +
+  geom_point() +
+  geom_line() +
+  geom_smooth(se = FALSE)
