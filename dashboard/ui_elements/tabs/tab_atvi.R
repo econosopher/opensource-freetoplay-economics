@@ -1,7 +1,33 @@
 tab_atvi <-
   tabItem(tabName = "activision",
-          h4("Discount Scaling Across Hard Currency SKUs"),
-          plotlyOutput("segment_mau"),
-          hr(),
-          plotlyOutput("segment_revenue")
+          fluidRow(
+            column(6,
+                   h4("MAUs"),
+                   plotlyOutput("segment_mau")
+                   ),
+            column(6,
+                   h4("Revenue"),
+                   plotlyOutput("")
+                   ),
+            ),
+          fluidRow(
+            column(6,
+                   h4("qARPU"),
+                   plotlyOutput("segment_arpu")
+                   ),
+            column(6,
+                   h4("Bookings"),
+                   plotlyOutput("segment_revenue")
+                   )
+            ),
+          fluidRow(
+            column(6,
+                   h4("Distribution"),
+                   plotlyOutput("distribution")
+            ),
+            column(6,
+                   h4("Region"),
+                   plotlyOutput("region")
+                   )
+            )
           )

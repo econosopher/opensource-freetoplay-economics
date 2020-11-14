@@ -8,12 +8,14 @@ library(unpivotr)
 
 # list of quarterly earnings worksheets
 file_paths <- list.files('dashboard/data', pattern = 'xlsx', full.names = TRUE)
-
+#path <- readxl::readxl_example("datasets.xlsx")
+#path <- "/Users/pblack/Documents/Git Projects/opensource-freetoplay-economics/dashboard/data/dashboard/data/ATVI 12-Quarter Financial Model Q1 CY20a.xlsx"
+path <- file_paths[1]
 # initialize data frame
 quarterly_results <- data.frame()
 
 # import all sheets from each workbook and merge to one df
-for (path in file_paths) {
+#for (path in file_paths) {
 
  import <-
   path %>%
@@ -24,7 +26,7 @@ for (path in file_paths) {
 
   quarterly_results <- bind_rows(quarterly_results, import)
 
-}
+#}
 
 # filter for sheets of interest across all workbooks
 quarterly_sheets <-
@@ -36,7 +38,7 @@ quarterly_results %>%
     'Rev Mix by Geographic Region'
     ))
 
-formats <- xlsx_formats("dashboard/data/ATVI 12-Quarter Financial Model Q1 CY20a.xlsx") # find format codes
+formats <- xlsx_formats("ATVI 12-Quarter Financial Model Q1 CY20a.xlsx") # find format codes
 bold <- formats$local$font$bold # find bold format code
 
 merge_df <- data.frame()
@@ -67,19 +69,3 @@ merge_df <-
          year_quarter = paste0(year, ' ', quarter),
          year_quarter = yearquarter(year_quarter)
          )
-
-merge_df %>%
-  filter(metric == 'Net Bookings 1') %>%
-  ggplot(aes(x = year_quarter, y = numeric, group = character, color = character)) +
-  labs(title = 'Quarterly Bookings', y = 'Quarterly Bookings (USD, millions)', x = '', color = "Segment") +
-  geom_point() +
-  geom_line() +
-  geom_smooth(se = FALSE)
-
-merge_df %>%
-  filter(metric == 'Net Bookings 1') %>%
-  ggplot(aes(x = year_quarter, y = numeric, group = character, color = character)) +
-  labs(title = 'Quarterly Bookings', y = 'Quarterly Bookings (USD, millions)', x = '', color = "Segment") +
-  geom_point() +
-  geom_line() +
-  geom_smooth(se = FALSE)
