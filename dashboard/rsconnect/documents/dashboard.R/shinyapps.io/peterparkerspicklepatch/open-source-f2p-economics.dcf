@@ -5,8 +5,8 @@ account: peterparkerspicklepatch
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2015079
-bundleId: 2939037
+bundleId: 3864196
 url: https://peterparkerspicklepatch.shinyapps.io/open-source-f2p-economics/
-when: 1585478899.64121
+when: 1605477507.00867
 asMultiple: FALSE
 asStatic: FALSE

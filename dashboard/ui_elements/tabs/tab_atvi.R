@@ -7,7 +7,7 @@ tab_atvi <-
                    ),
             column(6,
                    h4("Revenue"),
-                   plotlyOutput("")
+                   plotlyOutput("segment_revenue")
                    ),
             ),
           fluidRow(
@@ -17,7 +17,7 @@ tab_atvi <-
                    ),
             column(6,
                    h4("Bookings"),
-                   plotlyOutput("segment_revenue")
+                   plotlyOutput("bookings")
                    )
             ),
           fluidRow(

@@ -7,10 +7,9 @@ library(tidyxl)
 library(unpivotr)
 
 # list of quarterly earnings worksheets
-file_paths <- list.files('dashboard/data', pattern = 'xlsx', full.names = TRUE)
-#path <- readxl::readxl_example("datasets.xlsx")
-#path <- "/Users/pblack/Documents/Git Projects/opensource-freetoplay-economics/dashboard/data/dashboard/data/ATVI 12-Quarter Financial Model Q1 CY20a.xlsx"
+file_paths <- list.files('data', pattern = 'xlsx', full.names = TRUE)
 path <- file_paths[1]
+
 # initialize data frame
 quarterly_results <- data.frame()
 
@@ -34,11 +33,11 @@ quarterly_results %>%
   filter(sheet %in% c(
     'Operating Metrics',
     'NR and OI by Segment',
-    'Rev Mix by Segment',
+    'Rev Mix by Distribution',
     'Rev Mix by Geographic Region'
     ))
 
-formats <- xlsx_formats("ATVI 12-Quarter Financial Model Q1 CY20a.xlsx") # find format codes
+formats <- xlsx_formats(path) # find format codes
 bold <- formats$local$font$bold # find bold format code
 
 merge_df <- data.frame()
