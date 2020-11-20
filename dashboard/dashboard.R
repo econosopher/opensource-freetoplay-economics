@@ -13,7 +13,7 @@ library(readxl)
 library(tidyxl)
 library(unpivotr)
 library(tidyquant)
-library(fmpapi)
+library(gt)
 
 source("ui_elements/sidebar.R")
 source("ui_elements/body.R")
@@ -224,7 +224,7 @@ output$index_share_price <- renderPlotly(
 
 output$market_cap <- renderPlotly(
 
-  fmp_key_metrics(firm_symbols[firm_symbols!= '^IXIC'], quarterly = TRUE) %>%
+  market_cap %>%
   ggplot(aes(x = date, y = market_cap, colour = symbol)) +
     geom_point(alpha = 1/2) +
     geom_line(se = FALSE) +
@@ -279,6 +279,132 @@ output$composition_platform_share <- renderPlotly(
       scale_y_continuous(labels = percent_format())
 
   )
+
+
+what_metrics <-
+  yahooQF(c(
+    "Name (Long)",
+    "Change",
+    "Open",
+    "Days High",
+    "Days Low",
+    "Volume",
+    "Change in Percent",
+    "Previous Close",
+    "Change From 52-week Low",
+    "Percent Change From 52-week Low",
+    "Change From 52-week High",
+    "Percent Change From 52-week High",
+    "52-week Low",
+    "52-week High",
+    "50-day Moving Average",
+    "Change From 50-day Moving Average",
+    "Percent Change From 50-day Moving Average",
+    "200-day Moving Average",
+    "Change From 200-day Moving Average",
+    "Percent Change From 200-day Moving Average",
+    "Market Capitalization",
+    "P/E Ratio",
+    "Book Value",
+    "Shares Outstanding",
+    "Dividend/Share",
+    "Dividend Yield",
+    "Earnings/Share"
+    ))
+
+tickers <- c("EA", "ATVI", "TTWO", "ZNGA")
+
+# Not all the metrics are returned by Yahoo.
+metrics <- getQuote(tickers, what = what_metrics)
+
+metrics %>%
+  t() %>%
+  as.data.frame() %>%
+  tibble::rownames_to_column() %>%
+  #colnames()
+  #distinct(rowname)
+  gt() %>%
+    tab_header(title = md("Daily Financial Summary")) %>%
+      fmt_currency(
+        #columns = vars(Open, High, Low, `P. Close`, `Change From 52-week Low`)
+        columns = vars(EA),
+        rows = c(5)
+        )
+      summary_rows(
+        groups = TRUE,
+        columns = vars(`Total Value (USD)`),
+        fns = list(Total = "sum"),
+        formatter = fmt_currency,
+        currency = "USD",
+        decimals = 0
+        ) %>%
+      summary_rows(
+        groups = TRUE,
+        columns = vars(`Total Quantity`),
+        fns = list(Total = "sum"),
+        formatter = fmt_number,
+        use_seps = TRUE,
+        decimals = 0
+        ) %>%
+      grand_summary_rows(
+        columns = vars(`Total Value (USD)`),
+        fns = list(`Grand Total` = "sum"),
+        formatter = fmt_currency,
+        currency = "USD",
+        decimals = 0
+        ) %>%
+      grand_summary_rows(
+        columns = vars(`Total Quantity`),
+        fns = list(`Grand Total` = "sum"),
+        formatter = fmt_number,
+        decimals = 0,
+        use_seps = TRUE
+        ) %>%
+      tab_source_note(
+        source_note = md("Only lists items that have a price tag; things like face shapes are excluded")
+        ) %>%
+      tab_style(
+        style = cell_text(size = 12),
+        locations = list(
+          cells_stub(),
+          cells_body(columns = everything())
+          )
+        ) %>%
+      tab_stubhead(label = "Cosmetic Category") %>%
+      opt_row_striping()
+
+#create small dataset
+gtcars_8 <-
+  gtcars %>%
+  dplyr::group_by(ctry_origin) %>%
+  dplyr::top_n(2) %>%
+  dplyr::ungroup() %>%
+  dplyr::filter(ctry_origin != "United Kingdom")
+#> Selecting by msrp
+
+#transpose data
+row_labels <- colnames(gtcars_8)
+gtcars_8_t <- as.data.frame(t(as.matrix(gtcars_8)))
+gtcars_8_t$row_labels <- row_labels
+my_column_names <- colnames(gtcars_8_t)[1:8]
+
+#format data
+
+format_specs <- data.frame(row = row_labels[1:10]) # Name column with row labels
+format_specs$type     <- c("c","c","n","c","c","n","n","n","n","p")
+format_specs$decimals <- c( 0 , 0 , 0 , 0 , 0 , 1 , 2 , 2 , 1 , 2 )
+
+myfmt <- function(data, cols, row_spec) {
+  reduce(row_spec$row, function(x, y) {
+    row_spec <- filter(row_spec, row == y)
+    fmt(x, columns = cols,
+        rows = which(x[["_data"]][["row_labels"]] == y),
+        fns = function(x) switch(row_spec$type,
+                                 n = scales::number(as.numeric(x), accuracy = 10^(-row_spec$decimals), big.mark = ""),
+                                 p = scales::percent(as.numeric(x), scale = 1, accuracy = 10^(-row_spec$decimals))))
+        }, .init = data)
+}
+
 
 
 }

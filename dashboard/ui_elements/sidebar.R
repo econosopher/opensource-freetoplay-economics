@@ -1,11 +1,10 @@
 sidebar <-
   dashboardSidebar(
     sidebarMenu(
-      menuItem("Cross-Firm", startExpanded = TRUE,
-               menuSubItem("Summary", tabName = "finance", icon = icon("bullseye"))
-               #menuSubItem("Metric Picker", tabName = "activision", icon = icon("table")),
-
-      ),
+     # menuItem("Cross-Firm", startExpanded = TRUE,
+     #          menuSubItem("Summary", tabName = "finance", icon = icon("bullseye"))
+     #          menuSubItem("Metric Picker", tabName = "activision", icon = icon("table")),
+      #),
       menuItem("Activision", startExpanded = TRUE,
                menuSubItem("Summary", tabName = "activision", icon = icon("bullseye")),
                menuSubItem("Metric Picker", tabName = "metric_picker", icon = icon("table"))

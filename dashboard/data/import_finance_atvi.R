@@ -1,11 +1,3 @@
-library(tidyverse)
-library(stringr)
-library(lubridate)
-library(tsibble)
-library(readxl)
-library(tidyxl)
-library(unpivotr)
-
 # list of quarterly earnings worksheets
 file_paths <- list.files('data', pattern = 'xlsx', full.names = TRUE)
 path <- file_paths[1]
