@@ -21,6 +21,7 @@ source("data/raw_data.R")
 source("data/import_finance_atvi.R")
 source("data/import_finance_ea.R")
 source("data/daily_financial_summary.R")
+source("../../sdi-analyst-etls/compendium/cross_game/table.R")
 
 rep_clean <- theme_clean() %+replace%
   theme(legend.position = "bottom")
@@ -286,6 +287,7 @@ output$composition_platform_share <- renderPlotly(
   )
 
 output$daily_summary <- render_gt(tbl_daily_summary)
+output$weekly_cross_game_gt <- render_gt(tbl_weekly_cross_game)
 
 }
 

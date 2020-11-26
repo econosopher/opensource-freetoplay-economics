@@ -1,6 +1,11 @@
 sidebar <-
   dashboardSidebar(
     sidebarMenu(
+      menuItem("Cross-Game", startExpanded = TRUE,
+               menuSubItem("Summary", tabName = "weekly_cross_game", icon = icon("bullseye"))
+               #          menuSubItem("Summary", tabName = "finance", icon = icon("bullseye"))
+               #          menuSubItem("Metric Picker", tabName = "activision", icon = icon("table")),
+      ),
       menuItem("Cross-Firm", startExpanded = TRUE,
                 menuSubItem("Summary", tabName = "daily_financial_summary", icon = icon("bullseye"))
      #          menuSubItem("Summary", tabName = "finance", icon = icon("bullseye"))
