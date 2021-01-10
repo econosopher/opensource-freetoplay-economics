@@ -14,6 +14,7 @@ library(tidyxl)
 library(unpivotr)
 library(tidyquant)
 library(gt)
+library(glue)
 
 source("ui_elements/sidebar.R")
 source("ui_elements/body.R")
@@ -21,7 +22,7 @@ source("data/raw_data.R")
 source("data/import_finance_atvi.R")
 source("data/import_finance_ea.R")
 source("data/daily_financial_summary.R")
-source("../../sdi-analyst-etls/compendium/cross_game/table.R")
+#source("../../sdi-analyst-etls/compendium/cross_game/table.R")
 
 rep_clean <- theme_clean() %+replace%
   theme(legend.position = "bottom")
