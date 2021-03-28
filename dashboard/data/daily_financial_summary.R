@@ -1,8 +1,11 @@
+pacman::p_load('tidyquant', 'tidyverse', 'gt', 'scales')
+
 what_metrics <-
   yahooQF(c(
     "Name (Long)",
 
     "Open",
+    "Close",
     "Days High",
     "Days Low",
 
@@ -28,45 +31,81 @@ what_metrics <-
     "Earnings/Share"
     ))
 
-tickers <- c("EA", "ATVI", "TTWO", "ZNGA")
+tickers <- c(
+  "EA",
+  "ATVI",
+  "TTWO",
+  "ZNGA",
+  "UBSFY",
+  "GLUU",
+  "NTDOY",
+  "NTES",
+  "TCEHY",
+  "PLTK",
+  "CCOEF",
+  "OTGLY",
+  "NEXOF",
+  "NCBDF",
+  "SQNXF",
+  "THQQF",
+  "PRXXF",
+  "^GSPC"
+  )
 
 metrics <-
   getQuote(tickers, what = what_metrics) %>%
   as.data.frame() %>%
   rename(Firm = NameLong)
 
-metrics_t <-
+data_from <- today() - 1
+
+tbl_daily_summary <-
 metrics %>%
-  rownames_to_column(var = 'ticker') %>%
-  mutate(across(Open:`Days Low` | starts_with("Change From") | "P/E Ratio" | contains('-'),  ~(formattable::currency(.)))) %>%
-  mutate(across("Market Capitalization", ~scales::dollar(., suffix = 'B', scale = .000000001, trim = TRUE))) %>%
-  mutate(across(starts_with('%'), ~(formattable::percent(., digits = 1)))) %>%
-  mutate(across("Volume" | "Shares Outstanding", ~(formattable::accounting(., format = 'd')))) %>%
-  mutate_all(as.character) %>%
-  pivot_longer(-ticker) %>%
-  pivot_wider(names_from = ticker) %>%
+  rownames_to_column() %>%
+  select(
+    Ticker = rowname,
+    Firm,
+    `Market Capitalization`,
+    Open,
+    `% Change From 52-week High`,
+    `% Change From 200-day MA`,
+    `P/E Ratio`,
+    `Earnings/Share`
+  ) %>%
   mutate(
-    rown = row_number(),
-    group_label = case_when(
-      #rown == 2 ~ "Firm",
-      rown > 2 & rown <= 8 ~ "Today's Summary",
-      rown >= 9 & rown <= 12 ~ "52-week Summary",
-      rown >= 13 & rown <= 15 ~ "50-day Moving Averages",
-      rown >= 16 & rown <= 18 ~ "200-day Moving Averages",
-      rown >= 19 & rown <= 27 ~ "Topline Summary",
-      TRUE ~ ''
-      ))
-
-data_from <- today()-1
-
-#tbl_daily_summary <-
-metrics_t %>%
-  select(-'rown') %>%
-  filter(!name %in% c('Trade Time')) %>%
-  gt(rowname_col = "name", groupname_col = "group_label") %>%
-  tab_header(title = md("Daily Financial Summary"),
-             subtitle = glue::glue("Data: {data_from}")
-             ) %>%
+    Firm = if_else(Ticker == "^GSPC", "S&P 500", Firm),
+    Region = case_when(
+      Ticker %in% c("EA", "ATVI", "ZNGA", "GLUU",  "TTWO") ~ "North America",
+      Ticker %in% c("PLTK", "THQQF", "UBSFY", "PRXXF", "OTGLY") ~ "Europe",
+      Ticker %in% c("TCEHY", "NTDOY", "NTES",  "SQNXF", "CCOEF", "NCBDF", "NEXOF") ~ "Asia",
+      TRUE ~ "Other"
+    )
+  ) %>%
+  arrange(desc(`Market Capitalization`)) %>%
+  gt(
+    rowname_col = "Firm",
+    groupname_col = "Region"
+    ) %>%
+  tab_header(
+    title = md(""),
+    subtitle = glue::glue("Data: {data_from}")
+    ) %>%
+  fmt_currency(
+    columns = vars(Open, `P/E Ratio`, `Earnings/Share`),
+    decimals = 0
+  ) %>%
+  fmt_currency(
+    columns = vars(`Earnings/Share`),
+    decimals = 2
+  ) %>%
+  fmt_currency(
+    columns = vars(`Market Capitalization`),
+    suffixing = TRUE
+  ) %>%
+  fmt_percent(
+    columns = starts_with("%"),
+    decimals = 0
+  ) %>%
   tab_options(
     table.border.top.style = "none",
     table_body.border.top.style = "none",
@@ -80,44 +119,21 @@ metrics_t %>%
     column_labels.border.bottom.color = "#334422",
 
     row_group.border.right.style = "none",
-    stub.border.style = "none",
-
     row_group.font.size = 14,
-
     data_row.padding = px(2)
   ) %>%
   cols_align(
-    columns = vars(EA, ATVI, TTWO, ZNGA),
-    align = "right"
+    columns = vars(Firm, Ticker),
+    align = "left"
     ) %>%
-  tab_style(
-    style = list(
-      cell_borders(
-        sides = "right",
-        color = "#0000001A"
-        ),
-      cell_borders(
-        sides = "bottom",
-        color = "#FFFFFF"
-        ),
-      cell_text(
-        weight = "bold"
-        )
-      ),
-    locations = cells_stub(rows = TRUE)
-    ) %>%
-  tab_style(
-    style = list(
-      cell_borders(
-        sides = "right",
-        color = "#0000001A"
-        ),
-      cell_text(
-        weight = "bolder"
-        )
-      ),
-    locations = cells_row_groups()
-    ) %>%
-   opt_row_striping()
+  data_color(
+    columns = starts_with("%"),
+    apply_to = "text",
+    autocolor_text = TRUE,
+    colors = scales::col_numeric(
+      palette = c("red", "darkorange", "grey", "darkgreen"),
+      domain = c(-.5, 0, .5)
+      )
+  )
 
-
+tbl_daily_summary

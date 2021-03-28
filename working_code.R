@@ -65,3 +65,65 @@ for (workbook in unique(quarterly_sheets$workbook)) {
     xlsx_formats(workbook)
 
 }
+
+
+tbl_daily_summary <-
+metrics_t %>%
+  select(-'rown') %>%
+  filter(!name %in% c('Trade Time')) %>%
+  gt(rowname_col = "name", groupname_col = "group_label") %>%
+  tab_header(title = md("Daily Financial Summary"),
+             subtitle = glue::glue("Data: {data_from}")
+             ) %>%
+  tab_options(
+    table.border.top.style = "none",
+    table_body.border.top.style = "none",
+    table_body.border.bottom.color = "#0000001A",
+    table.font.size = 12,
+
+    column_labels.font.size = 14,
+    column_labels.border.top.style = "none",
+    column_labels.border.bottom.style = "none",
+    column_labels.border.bottom.width = 1,
+    column_labels.border.bottom.color = "#334422",
+
+    row_group.border.right.style = "none",
+    stub.border.style = "none",
+
+    row_group.font.size = 14,
+
+    data_row.padding = px(2)
+  ) %>%
+  cols_align(
+    columns = vars(EA, ATVI, TTWO, ZNGA),
+    align = "right"
+    ) %>%
+  tab_style(
+    style = list(
+      cell_borders(
+        sides = "right",
+        color = "#0000001A"
+        ),
+      cell_borders(
+        sides = "bottom",
+        color = "#FFFFFF"
+        ),
+      cell_text(
+        weight = "bold"
+        )
+      ),
+    locations = cells_stub(rows = TRUE)
+    ) %>%
+  tab_style(
+    style = list(
+      cell_borders(
+        sides = "right",
+        color = "#0000001A"
+        ),
+      cell_text(
+        weight = "bolder"
+        )
+      ),
+    locations = cells_row_groups()
+    ) %>%
+   opt_row_striping()
