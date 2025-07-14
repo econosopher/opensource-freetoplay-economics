@@ -1,6 +1,15 @@
-.Rproj
-.Rproj.user
+# R specific
+.Renviron
 .Rhistory
 .RData
-.Ruserdata
-.DS_Store
+.Rproj.user
+
+# Shiny specific
+rsconnect/
+
+# Dependency directories
+renv/
+simfin_cache/
+
+# Development directory
+dev/
