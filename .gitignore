@@ -13,3 +13,6 @@ simfin_cache/
 
 # Development directory
 dev/
+# Claude configuration
+CLAUDE.md
+.claude/
